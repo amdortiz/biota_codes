@@ -1,79 +1,143 @@
-# library(tidyverse)
-# library(maps)
-# library(RColorBrewer)
-# library(viridis)
-# library(raster)
-# 
-# wr<-map_data("world")
-# 
-# pred<-read.csv("resource.csv")
-# crop<-subset(pred, Predominant_land_use=="Cropland")
-# crop$Best_guess_binomial[crop$Best_guess_binomial==""] <- "NA"
-# crop<-crop[!is.na(crop$Best_guess_binomial),]
-# lc_type<-"Croplands"
-# 
-# lc<-data.frame(rasterToPoints(raster("LC_hd_global_2010.tif")))
-# names(lc)=c("lon", "lat", "cat")
-# lc<-subset(lc, cat>0) #excluding water
-# lc<-subset(lc, cat==12) #croplands
-# 
-# wrmap<-ggplot(wr, aes(x = long, y = lat, group=group))+
-#   geom_polygon(fill = NA, colour = "black", size=0.25)+
-#   theme_void()+ coord_equal()+
-#   geom_raster(data = lc, aes(x = lon, y = lat, fill=as.factor(cat)),inherit.aes = FALSE)+
-#   labs(title = paste("Land cover 2010 (GLCF) and PREDICTS cropland species abundance", sep="")) +
-#   scale_fill_manual(values="grey", labels = lc_type)+
-#   guides(fill=guide_legend(title="Categories")) +
-#   scale_y_continuous(limits=c(-60,90))+
-#   geom_point(data=crop, aes(x = Longitude, y = Latitude, color=Class, size=Effort_corrected_measurement),
-#                                         inherit.aes = FALSE, alpha=0.2)+theme(legend.position="bottom")+
-#   scale_size_continuous(range=c(0.1,20), guide=FALSE)+
-#   scale_color_viridis(discrete=TRUE)
+library(tidyverse)
+library(maps)
+library(RColorBrewer)
+library(viridis)
+library(raster)
+
+wr<-map_data("world")
+pred<-read.csv("resource.csv")
+crop<-subset(pred, Predominant_land_use=="Cropland")
+
+chordata<-subset(crop, Phylum=="Chordata")
+chordata$Best_guess_binomial[chordata$Best_guess_binomial==""] <- NA
+chordata<-chordata[!is.na(chordata$Best_guess_binomial),]
+
+insecta<-subset(crop, Class=="Insecta")
+insecta$Best_guess_binomial[insecta$Best_guess_binomial==""] <- NA
+insecta$Best_guess_binomial[insecta$Order==""] <- NA
+insecta<-insecta[!is.na(insecta$Best_guess_binomial),]
+insecta<-insecta[!is.na(insecta$Order),]
 
 #~adding yield
-
 maize<-read.csv("maize_yield_2010.csv")
 soybean<-read.csv("soybean_yield_2010.csv")
 rice<-read.csv("rice_yield_2010.csv")
 wheat<-read.csv("wheat_yield_2010.csv")
 
-#manual bins: maize/rice
-mr_bin<-function(df){
-  if (df$yield<0){
-    df$rank<-NA
-  } else if (df$yield <11){
-    df$rank <- "Low (0-10 t/ha)"
-  } else if (df$yield >10 & df$yield<20){
-    df$rank <- "Mid (11-20 t/ha)"
-  } else if (df$yield >19){
-    df$rank <- "High (Above 20 t/ha)"
-  } else {
-    df$rank<-NA
+#manual bins: maize
+m_bin<-function(df){
+  df <- df[order(df$yield),]
+  for (i in 1:nrow(df)){
+    if (df$yield[i] >0 & df$yield[i]<8){
+      df$rank[i] <- "A. Low (0-7 t/ha)"
+    } else if (df$yield[i] >7 & df$yield[i]<=15){
+      df$rank[i] <- "B. Mid (8-15 t/ha)"
+    } else if (df$yield[i] >15){
+      df$rank[i] <- "C. High (Above 15 t/ha)"
+    } else {
+      df$rank[i]<-NA
+    }  
   }
+  df<-df[!is.na(df$rank),]
   return(df)
 }
 
-#manual bins: soy/wheat
-sw_bin<-function(df){
-  if (df$yield<0){
-    df$rank<-NA
-  } else if (df$yield <4){
-    df$rank <- "Low (0-3 t/ha)"
-  } else if (df$yield >3 & df$yield<8){
-    df$rank <- "Mid (4-7 t/ha)"
-  } else if (df$yield >7){
-    df$rank <- "High (Above 8 t/ha)"
-  } else {
-    df$rank<-NA
+#manual bins: wheat
+wr_bin<-function(df){
+  df <- df[order(df$yield),]
+  for (i in 1:nrow(df)){
+    if (df$yield[i] >0 & df$yield[i]<4){
+      df$rank[i] <- "A. Low (0-3 t/ha)"
+    } else if (df$yield[i] >3 & df$yield[i]<8){
+      df$rank[i] <- "B. Mid (4-7 t/ha)"
+    } else if (df$yield[i] >7){
+      df$rank[i] <- "C. High (Above 8 t/ha)"
+    } else {
+      df$rank[i]<-NA
+    }
   }
+  df<-df[!is.na(df$rank),]
   return(df)
 }
 
-+ geom_raster(data = df[[i]], aes(x = lon, y = lat, fill=yield),inherit.aes = FALSE)+
-  scale_fill_gradientn(colours=mypalette)
+#manual bins: soy
+s_bin<-function(df){
+  df <- df[order(df$yield),]
+  for (i in 1:nrow(df)){
+    if (df$yield[i] >0 & df$yield[i]<1.5){
+      df$rank[i] <- "A. Low (0-1.5 t/ha)"
+    } else if (df$yield[i] >=1.5 & df$yield[i]<2.99){
+      df$rank[i] <- "B. Mid (1.6-3 t/ha)"
+    } else if (df$yield[i] >3){
+      df$rank[i] <- "C. High (Above 3 t/ha)"
+    } else {
+      df$rank[i]<-NA
+    }
+  }
+  df<-df[!is.na(df$rank),]
+  return(df)
+}
 
+maize<-m_bin(maize)
+rice<-wr_bin(rice)
+soybean<-s_bin(soybean)
+wheat<-wr_bin(wheat)
 
-# png("croplands_predicts.png", width=12, height=8, units="in", res=100)
-# par(mar=c(1,1,1,1))
-# print(wrmap)
-# dev.off()
+colz<-brewer.pal(3, "OrRd")
+
+#Plotting functions and operations
+yield_only<-function(cropdf, crop_name){
+  png(paste("yield_2010_", crop_name, ".png", sep=""), width=12, height=8, units="in", res=100)
+  a<-ggplot(wr, aes(x = long, y = lat, group=group))+
+    geom_polygon(fill = NA, colour = "black", size=0.2)+
+    geom_raster(data =cropdf, aes(x = lon, y = lat, fill=rank), inherit.aes = FALSE)+
+    scale_y_continuous(limits=c(-60,90))+
+    scale_size_continuous(range=c(0.1,20), guide=FALSE)+
+    scale_fill_manual(values=colz)+
+    
+    guides(fill=guide_legend(title="Yield categories")) +
+    labs(title = paste("2010 ", crop_name, " yield (Iizumi, 2017)", sep="")) +
+    theme(legend.position="bottom")+
+    theme_void()+ coord_equal()
+  
+  print(a)
+  dev.off()  
+}
+
+yield_only(maize, "Maize")
+yield_only(rice, "Rice")
+yield_only(wheat, "Wheat")
+yield_only(soybean, "Soybean")
+
+plotit<-function(cropdf, crop_name, predicts, pred_group, Taxa){
+  png(paste("croplands_predicts_", crop_name, "_", pred_group, ".png", sep=""), width=12, height=8, units="in", res=100)
+    a<-ggplot(wr, aes(x = long, y = lat, group=group))+
+    geom_polygon(fill = NA, colour = "black", size=0.2)+
+    geom_raster(data =cropdf, aes(x = lon, y = lat, fill=rank), inherit.aes = FALSE)+
+    geom_point(data=predicts, aes(x = Longitude, y = Latitude, color=Taxa, size=Effort_corrected_measurement),
+               inherit.aes = FALSE, alpha=0.2)+
+      
+    
+    scale_y_continuous(limits=c(-60,90))+
+    scale_size_continuous(range=c(0.1,20), guide=FALSE)+
+    scale_color_viridis(discrete=TRUE)+
+    scale_fill_manual(values=colz)+
+    
+    guides(fill=guide_legend(title="Yield categories")) +
+    labs(title = paste("2010 ", crop_name, " yield (Iizumi, 2017) and PREDICTS ", pred_group, " cropland species abundance", sep="")) +
+      theme(legend.position="bottom")+
+    theme_void()+ coord_equal()
+  
+  print(a)
+  dev.off()  
+}
+
+plotit(maize, "Maize", chordata, "vertebrates", chordata$Class)
+plotit(rice, "Rice",chordata, "vertebrates", chordata$Class)
+plotit(wheat, "Wheat",chordata, "vertebrates", chordata$Class)
+plotit(soybean, "Soybean",chordata, "vertebrates", chordata$Class)
+
+plotit(maize, "Maize", insecta, "insects", insecta$Order)
+plotit(rice, "Rice",insecta, "insects", insecta$Order)
+plotit(wheat, "Wheat",insecta, "insects", insecta$Order)
+plotit(soybean, "Soybean",insecta, "insects", insecta$Order)
