@@ -11,8 +11,6 @@
 #' process_estat()
 #' 
 
-
-create("EarthstatProcess")
 process_estat<-function(tiffile, df, vname, crop_name){
   df<-data.frame(rasterToPoints(raster(paste(tiffile, sep=""))))
   names(df)=c("lon", "lat", "variable")
