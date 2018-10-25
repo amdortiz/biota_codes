@@ -1,16 +1,3 @@
-#' A Function to process and categorise Earth stat data
-#'
-#' This function uses quartile bins and makes a csv.
-#' @param tiffile name of tiff file
-#' @param df returning dataframe
-#' @param vname variable name
-#' @param crop_name type of crop
-#' @keywords agriculture
-#' @export
-#' @examples
-#' process_estat()
-#' 
-
 process_estat<-function(tiffile, df, vname, crop_name){
   df<-data.frame(rasterToPoints(raster(paste(tiffile, sep=""))))
   names(df)=c("lon", "lat", "variable")
