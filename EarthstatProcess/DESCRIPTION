@@ -1,0 +1,10 @@
+Package: EarthstatProcess
+Type: Package
+Title: EarthstatProcess
+Version: 0.1.0
+Author: Monica O.
+Maintainer: Monica <m.ortiz@ucl.ac.uk>
+Description: Process earthstat data into a csv.
+License: CC-BY
+Encoding: UTF-8
+LazyData: true
