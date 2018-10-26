@@ -1,19 +1,4 @@
-# Hello, world!
-#
-# This is an example function named 'hello'
-# which prints 'Hello, world!'.
-#
-# You can learn more about package authoring with RStudio at:
-#
-#   http://r-pkgs.had.co.nz/
-#
-# Some useful keyboard shortcuts for package authoring:
-#
-#   Build and Reload Package:  'Ctrl + Shift + B'
-#   Check Package:             'Ctrl + Shift + E'
-#   Test Package:              'Ctrl + Shift + T'
-
-process_estat<-function(tiffile, df, vname, crop_name){
+process_estat<-function(tiffile, vname, crop_name){
   df<-data.frame(rasterToPoints(raster(paste(tiffile, sep=""))))
   names(df)=c("lon", "lat", "variable")
   df<-subset(df, variable!=0)
