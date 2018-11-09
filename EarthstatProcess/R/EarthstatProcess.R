@@ -80,6 +80,6 @@ plot_estat<-function(cropdf, vname, crop_name){
     theme(legend.position="bottom")+
     theme_void()+ coord_equal()
 
-  print(a)
+  return(a)
   dev.off()
 }
