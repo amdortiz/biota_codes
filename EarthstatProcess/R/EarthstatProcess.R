@@ -33,7 +33,7 @@ qbin_csv<-function(dfname, vname, crop_name){
   df<-read.csv(paste(dfname, sep=""))
   names(df)=c("lon", "lat", "variable")
   df<-subset(df, variable!=0)
-  qq<-quantile(df$yield)
+  qq<-quantile(df$variable)
   names(qq)=NULL
   for (i in 1:nrow(df)){
     if (df$variable[i]<qq[2]){
