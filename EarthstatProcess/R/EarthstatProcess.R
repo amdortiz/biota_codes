@@ -65,21 +65,21 @@ qbin_csv<-function(dfname, vname, crop_name){
   write.csv(df, paste(crop_name, "_", vname, ".csv", sep=""), row.names=FALSE)
   return(df)
 }
-colz<-brewer.pal(4, "OrRd")
-wr<-map_data("world")
-
-plot_estat<-function(cropdf, vname, crop_name){
-  png(paste(vname, "_", crop_name, ".png", sep=""), width=12, height=8, units="in", res=100)
-  a<-ggplot(wr, aes(x = long, y = lat, group=group))+
-    geom_polygon(fill = NA, colour = "black", size=0.2)+
-    geom_raster(data =cropdf, aes(x = lon, y = lat, fill=rank), inherit.aes = FALSE)+
-    scale_y_continuous(limits=c(-60,90))+
-    scale_size_continuous(range=c(0.1,20), guide=FALSE)+
-    scale_fill_manual(values=colz)+
-    guides(fill=guide_legend(title=paste(crop_name, " ", vname, sep="")) +
-    theme(legend.position="bottom")+
-    theme_void()+ coord_equal()
-
-  return(a)
-  dev.off()
-}
+# colz<-brewer.pal(4, "OrRd")
+# wr<-map_data("world")
+#
+# plot_estat<-function(cropdf, vname, crop_name){
+#   png(paste(vname, "_", crop_name, ".png", sep=""), width=12, height=8, units="in", res=100)
+#   a<-ggplot(wr, aes(x = long, y = lat, group=group))+
+#     geom_polygon(fill = NA, colour = "black", size=0.2)+
+#     geom_raster(data =cropdf, aes(x = lon, y = lat, fill=rank), inherit.aes = FALSE)+
+#     scale_y_continuous(limits=c(-60,90))+
+#     scale_size_continuous(range=c(0.1,20), guide=FALSE)+
+#     scale_fill_manual(values=colz)+
+#     guides(fill=guide_legend(title=paste(crop_name, " ", vname, sep="")) +
+#     theme(legend.position="bottom")+
+#     theme_void()+ coord_equal()
+#
+#   return(a)
+#   dev.off()
+# }
