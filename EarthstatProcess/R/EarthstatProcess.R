@@ -65,7 +65,7 @@ qbin_csv<-function(dfname, vname, crop_name){
   write.csv(df, paste(crop_name, "_", vname, ".csv", sep=""), row.names=FALSE)
   return(df)
 }
-
+colz<-brewer.pal(4, "OrRd")
 plot_estat<-function(cropdf, vname, crop_name){
   png(paste(vname, crop_name, ".png", sep=""), width=12, height=8, units="in", res=100)
   wr<-map_data("world")
